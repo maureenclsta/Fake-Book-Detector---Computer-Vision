@@ -29,17 +29,21 @@ Their results are combined through an ensemble decision process to improve class
 
 ## Dataset
 
-The project uses a custom dataset containing **10 book covers**.
+The project uses a **custom image dataset built from 10 book covers**. Instead of relying solely on an existing dataset, the images used for evaluation were generated and prepared specifically for this project.
 
-Each book contains a reference image, test variations, and synthetically manipulated images.
+The dataset is organized into three main types of samples:
 
 ### Reference Images
 
-Each book has one original reference cover stored in the `reference/` directory.
+Each book starts with one original reference cover stored in the `reference/` directory.
 
-### Test Images
+These original covers serve as the baseline images for feature extraction and matching.
 
-Test images are generated from the reference covers using transformations such as:
+### Generated Test Images
+
+Test samples were **generated independently from the original reference covers** using custom image augmentation scripts.
+
+The augmentation process introduces realistic visual variations, including:
 
 - Rotation
 - Brightness adjustment
@@ -48,11 +52,21 @@ Test images are generated from the reference covers using transformations such a
 - Cropping and resizing
 - Perspective transformation
 
-These variations are used to evaluate the robustness of feature matching under visual changes.
+These generated images are stored in the `test/` directory and are used to evaluate how well the feature-matching system recognizes the same book cover under different visual conditions.
 
-### Suspicious Images
+The test dataset was generated using:
 
-Additional manipulated images are generated using combinations of:
+**`src/generate_test_images.py`**
+
+This script automatically creates multiple variations for each reference book, allowing the project to build a controlled evaluation dataset from the original covers.
+
+### Generated Suspicious Images
+
+A separate set of manipulated images was **created from the original reference covers using custom image-generation scripts**.
+
+These images simulate covers that are derived from the original but have been visually altered or degraded.
+
+The transformations include:
 
 - Contrast adjustment
 - Blur
@@ -62,11 +76,33 @@ Additional manipulated images are generated using combinations of:
 - JPEG compression artifacts
 - Combined transformations
 
-These images are evaluated as the **SUSPICIOUS** class.
+These samples are stored in the `fake/` directory and are evaluated as the **SUSPICIOUS** class.
+
+The manipulated dataset was generated using:
+
+**`src/generate_fake.py`**
+
+This approach allows the project to create its own controlled set of suspicious samples rather than relying on a pre-existing labeled dataset.
 
 ### Counterfeit Samples
 
-Counterfeit samples are created through cross-book comparisons, where a reference cover is compared against the reference cover of a different book.
+Counterfeit samples are created through **cross-book comparisons**.
+
+A reference cover from one book is compared against a reference cover belonging to a different book. These samples represent cases where the query image does not correspond to the claimed reference book.
+
+---
+
+## Dataset Generation and Feature Matching
+
+The dataset preparation and feature-matching stages are separated into two main phases:
+
+**Original Book Covers → Custom Augmentation & Manipulation → Generated Dataset → ORB/SIFT Feature Extraction → Feature Matching → Classification**
+
+First, the original book covers are used as reference images. Custom scripts then generate test variations and manipulated samples from these references.
+
+The generated images are subsequently used as query images for the Computer Vision pipeline. ORB and SIFT features are extracted from both the reference and query images, followed by feature matching and threshold-based classification.
+
+This approach provides a controlled experimental environment for evaluating the robustness of local feature matching under different types of image variation and manipulation.
 
 ---
 
